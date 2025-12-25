@@ -6,6 +6,7 @@
     --secondary: #57606f;
     --text-main: #ffffff;
     --font-family: 'Outfit', sans-serif;
+    --bottom-bar-height: 80px;
 }
 
 * { box-sizing: border-box; }
@@ -15,59 +16,45 @@ body {
     background-color: var(--bg-dark);
     font-family: var(--font-family);
     color: var(--text-main);
-    height: 100vh; /* Fixed height for mobile app feel */
-    overflow: hidden; /* No body scroll */
+    /* Allow scrolling if screen is small */
+    overflow-y: auto; 
+    /* Make space for the fixed bottom bar */
+    padding-bottom: calc(var(--bottom-bar-height) + 20px);
 }
 
 .app-container {
-    height: 100%;
     display: flex;
     flex-direction: column;
-    padding: 10px;
-    max-width: 1200px;
+    padding: 15px;
+    max-width: 800px;
     margin: 0 auto;
+    gap: 15px;
 }
 
 /* HEADER */
 header {
-    flex-shrink: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 10px;
 }
-.logo { font-weight: 700; font-size: 1.4rem; color: var(--primary); letter-spacing: 1px; }
+.logo { font-weight: 700; font-size: 1.5rem; color: var(--primary); letter-spacing: 1px; }
 #status-badge { font-size: 0.8rem; padding: 4px 12px; background: #333; border-radius: 12px; }
-
-/* MAIN CONTENT (Scrollable area) */
-.main-content {
-    flex: 1; /* Takes all remaining space */
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    min-height: 0; /* Important for scroll to work inside flex */
-    overflow-y: auto; 
-}
 
 /* VIDEO SECTION */
 .video-section {
     display: flex;
-    flex-direction: column; /* Mobile: Stack vertically */
-    gap: 10px;
-    justify-content: center;
-    align-items: center;
-    flex-shrink: 0; /* Don't shrink videos too small */
+    flex-direction: column;
+    gap: 15px;
 }
 
 .video-card {
     position: relative;
     width: 100%;
-    max-width: 400px; /* Max size for desktop */
-    aspect-ratio: 1 / 1; /* Force Square */
+    aspect-ratio: 1 / 1; /* Keep it Square */
     background: #000;
-    border-radius: 16px;
+    border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
     border: 1px solid rgba(255,255,255,0.1);
 }
 
@@ -75,120 +62,128 @@ video {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transform: scaleX(-1);
+    transform: scaleX(-1); /* Mirror */
 }
 
 .label-badge {
     position: absolute;
-    bottom: 8px;
-    left: 8px;
+    bottom: 10px;
+    left: 10px;
     background: rgba(0,0,0,0.6);
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.8rem;
     backdrop-filter: blur(4px);
 }
 
 /* CHAT SECTION */
 .chat-section {
-    flex: 1; /* Takes remaining height after videos */
     background: var(--card-bg);
-    border-radius: 16px;
+    border-radius: 20px;
     display: flex;
     flex-direction: column;
+    height: 250px; /* Fixed height for chat area */
     overflow: hidden;
-    min-height: 150px; /* Minimum height for chat */
+    border: 1px solid rgba(255,255,255,0.05);
 }
 
 .chat-display {
     flex: 1;
-    padding: 10px;
+    padding: 15px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 
-.msg { padding: 8px 12px; border-radius: 10px; font-size: 0.9rem; max-width: 85%; word-wrap: break-word; }
+.msg { padding: 8px 14px; border-radius: 12px; font-size: 0.95rem; max-width: 85%; word-wrap: break-word; }
 .msg.local { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 2px; }
 .msg.remote { align-self: flex-start; background: #333; color: #ddd; border-bottom-left-radius: 2px; }
-.system-msg { text-align: center; color: #888; font-size: 0.8rem; margin: 5px 0; font-style: italic; }
+.system-msg { text-align: center; color: #777; font-size: 0.8rem; margin: 10px 0; font-style: italic; }
 
 /* CHAT INPUT */
 #chat-form {
     display: flex;
-    padding: 8px;
-    background: rgba(0,0,0,0.2);
-    gap: 8px;
+    padding: 10px;
+    background: rgba(0,0,0,0.3);
+    gap: 10px;
 }
 #chat-input {
     flex: 1;
     background: rgba(255,255,255,0.1);
     border: none;
-    padding: 10px;
-    border-radius: 20px;
+    padding: 12px;
+    border-radius: 50px;
     color: white;
     outline: none;
 }
 #send-btn {
     background: var(--primary);
     border: none;
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
     color: white;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     cursor: pointer;
 }
 
-/* BOTTOM CONTROLS */
+/* --- FIXED BOTTOM BAR (The Fix) --- */
 .controls-area {
-    flex-shrink: 0;
-    padding-top: 10px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: var(--bottom-bar-height);
+    background: rgba(15, 15, 19, 0.95); /* Nearly opaque background */
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255,255,255,0.1);
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 0 20px;
+    z-index: 1000; /* Always on top */
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+}
+
+.button-group {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    max-width: 500px;
 }
 
 button {
-    padding: 14px 30px;
+    flex: 1;
+    padding: 14px 0;
     border-radius: 50px;
     border: none;
     font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     transition: transform 0.1s;
-    width: 100%;
-    max-width: 300px;
 }
 button:active { transform: scale(0.95); }
 
-.button-group {
-    display: flex;
-    gap: 10px;
-    width: 100%;
-    justify-content: center;
-}
-
-.btn-primary { background: var(--primary); color: white; }
+.btn-primary { background: linear-gradient(135deg, var(--primary), #8e44ad); color: white; width: 100%; max-width: 400px; }
 .btn-danger { background: var(--danger); color: white; }
 .btn-secondary { background: var(--secondary); color: white; }
 
 .hidden { display: none !important; }
 
-/* --- DESKTOP TWEAKS --- */
+/* Desktop Tweak */
 @media (min-width: 800px) {
-    .main-content {
-        flex-direction: row; /* Side by side */
+    .app-container {
+        flex-direction: row;
+        max-width: 1000px;
         align-items: flex-start;
     }
     .video-section {
-        flex-direction: column; /* Stack videos on left */
         width: 400px;
     }
     .chat-section {
-        height: 100%; /* Full height */
+        height: 500px;
+        flex: 1;
     }
 }
 
