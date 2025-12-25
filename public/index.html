@@ -2,32 +2,48 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHOTTA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SHOTTA - Video & Chat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="container">
+    <div class="app-container">
         <header>
-            <h1>SHOTTA</h1>
-            <p id="status-text">Click Start to find a stranger</p>
+            <div class="logo">SHOTTA</div>
+            <div id="status-badge" class="status-waiting">Idle</div>
         </header>
 
-        <div class="video-container">
-            <div class="video-box local">
-                <video id="local-video" autoplay playsinline muted></video>
-                <span class="label">You</span>
+        <div class="main-grid">
+            
+            <div class="video-section">
+                <div class="video-card remote-card">
+                    <video id="remote-video" autoplay playsinline></video>
+                    <div class="label-badge">Stranger</div>
+                </div>
+
+                <div class="video-card local-card">
+                    <video id="local-video" autoplay playsinline muted></video>
+                    <div class="label-badge">You</div>
+                </div>
             </div>
-            <div class="video-box remote">
-                <video id="remote-video" autoplay playsinline></video>
-                <span class="label">Stranger</span>
+
+            <div class="chat-section">
+                <div class="chat-box" id="chat-box">
+                    <div class="system-msg">Click 'Find Stranger' to start chatting.</div>
+                </div>
+                <form id="chat-form" class="hidden">
+                    <input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off">
+                    <button type="submit" id="send-btn">➤</button>
+                </form>
             </div>
+
         </div>
 
-        <div class="controls">
-            <button id="start-btn">Start</button>
-            <button id="next-btn" class="hidden">Next</button>
+        <div class="controls-area">
+            <button id="start-btn" class="btn-primary">Find Stranger</button>
+            <button id="next-btn" class="btn-danger hidden">Next Person ➔</button>
         </div>
     </div>
 
@@ -35,3 +51,4 @@
     <script src="script.js"></script>
 </body>
 </html>
+
