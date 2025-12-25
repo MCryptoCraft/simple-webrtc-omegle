@@ -1,20 +1,20 @@
 const socket = io();
 
+// UI Elements
 const localVideo = document.getElementById('local-video');
 const remoteVideo = document.getElementById('remote-video');
 const statusBadge = document.getElementById('status-badge');
 
-// Buttons
 const startBtn = document.getElementById('start-btn');
 const nextBtn = document.getElementById('next-btn');
 const stopBtn = document.getElementById('stop-btn');
 const activeControls = document.getElementById('active-controls');
 
-// Chat
 const chatForm = document.getElementById('chat-form');
 const chatInput = document.getElementById('chat-input');
 const chatBox = document.getElementById('chat-box');
 
+// WebRTC State
 let localStream;
 let peerConnection;
 const rtcConfig = {
@@ -24,15 +24,16 @@ const rtcConfig = {
     ]
 };
 
-// 1. Media Handling
+// --- MEDIA FUNCTIONS ---
 async function startMedia() {
     try {
-        if (localStream) return; // Already running
-        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        localVideo.srcObject = localStream;
+        if (!localStream) {
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            localVideo.srcObject = localStream;
+        }
     } catch (err) {
         console.error("Media Error:", err);
-        addSystemMessage("Error: Could not access camera.");
+        addSystemMessage("Error: Please allow camera access.");
     }
 }
 
@@ -45,7 +46,7 @@ function stopMedia() {
     remoteVideo.srcObject = null;
 }
 
-// 2. Start / Stop / Next Logic
+// --- BUTTON LISTENERS ---
 startBtn.addEventListener('click', async () => {
     await startMedia();
     socket.emit('find-match');
@@ -63,21 +64,17 @@ stopBtn.addEventListener('click', () => {
     stopCall();
 });
 
-// 3. New Feature: Auto-Stop on Minimize
+// Auto-stop on minimize
 document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === 'hidden') {
-        // If user leaves the tab/minimizes browser
-        if (localStream) {
-            stopCall();
-            addSystemMessage("Call ended (App minimized)");
-        }
+    if (document.visibilityState === 'hidden' && localStream) {
+        stopCall();
     }
 });
 
 function stopCall() {
-    resetConnection(); // Close WebRTC
-    stopMedia();       // Turn off camera light
-    socket.emit('disconnect-manual'); // Optional signal to server
+    resetConnection();
+    stopMedia();
+    socket.emit('disconnect-manual');
     updateUI('idle');
     statusBadge.innerText = "Idle";
     statusBadge.style.background = "#333";
@@ -90,7 +87,7 @@ function resetConnection() {
     }
 }
 
-// 4. Chat Logic
+// --- CHAT LOGIC ---
 chatForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const msg = chatInput.value.trim();
@@ -125,21 +122,25 @@ function clearChat() {
     chatBox.innerHTML = '<div class="system-msg">New stranger found. Say hi!</div>';
 }
 
-// 5. Socket Events
+// --- SOCKET EVENTS ---
 socket.on('waiting', (msg) => {
     statusBadge.innerText = "Searching...";
-    statusBadge.style.background = "#e1b12c";
+    statusBadge.style.background = "#f1c40f";
+    statusBadge.style.color = "black";
     addSystemMessage(msg);
 });
 
 socket.on('match-found', async ({ role }) => {
     statusBadge.innerText = "Connected";
-    statusBadge.style.background = "#2ed573";
+    statusBadge.style.background = "#2ecc71";
+    statusBadge.style.color = "white";
     updateUI('connected');
     addSystemMessage("Stranger connected!");
 
     createPeerConnection();
-    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+    if(localStream) {
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+    }
 
     if (role === 'initiator') {
         const offer = await peerConnection.createOffer();
@@ -169,8 +170,8 @@ socket.on('ice-candidate', async (candidate) => {
 socket.on('peer-disconnected', () => {
     resetConnection();
     remoteVideo.srcObject = null;
-    statusBadge.innerText = "Disconnected";
-    statusBadge.style.background = "#ff4757";
+    statusBadge.innerText = "Stranger Left";
+    statusBadge.style.background = "#e74c3c";
     addSystemMessage("Stranger left. Click Next.");
 });
 
@@ -185,9 +186,10 @@ function createPeerConnection() {
     };
 }
 
-// 6. UI Manager
+// --- UI MANAGER ---
 function updateUI(state) {
     if (state === 'idle') {
+        startBtn.parentElement.classList.remove('hidden'); // Ensure parent is visible
         startBtn.classList.remove('hidden');
         activeControls.classList.add('hidden');
         chatForm.classList.add('hidden');
@@ -197,8 +199,11 @@ function updateUI(state) {
         chatForm.classList.add('hidden');
     } else if (state === 'connected') {
         startBtn.classList.add('hidden');
-        activeControls.classList.remove('hidden'); // Show Stop/Next
+        activeControls.classList.remove('hidden');
         chatForm.classList.remove('hidden');
-        chatInput.focus();
     }
 }
+
+// Force UI reset on load
+updateUI('idle');
+
