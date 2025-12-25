@@ -5,6 +5,11 @@ const localVideo = document.getElementById('local-video');
 const remoteVideo = document.getElementById('remote-video');
 const statusBadge = document.getElementById('status-badge');
 
+// Overlays
+const remoteOverlay = document.getElementById('remote-overlay');
+const localOverlay = document.getElementById('local-overlay');
+const remoteStatusText = document.getElementById('remote-status-text');
+
 const startBtn = document.getElementById('start-btn');
 const nextBtn = document.getElementById('next-btn');
 const stopBtn = document.getElementById('stop-btn');
@@ -24,12 +29,33 @@ const rtcConfig = {
     ]
 };
 
+// --- HELPER: Control Overlays ---
+function setVideoState(type, state) {
+    // type: 'local' or 'remote'
+    // state: 'playing', 'waiting', 'stopped'
+    
+    const overlay = type === 'local' ? localOverlay : remoteOverlay;
+    
+    if (state === 'playing') {
+        overlay.classList.remove('visible');
+    } else if (state === 'waiting') {
+        overlay.classList.add('visible');
+        if (type === 'remote') {
+            overlay.innerHTML = '<div class="spinner"></div><span>Searching...</span>';
+        }
+    } else if (state === 'stopped') {
+        overlay.classList.add('visible');
+        overlay.innerHTML = '<div class="icon">⏹</div><span>Stopped</span>';
+    }
+}
+
 // --- MEDIA FUNCTIONS ---
 async function startMedia() {
     try {
         if (!localStream) {
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             localVideo.srcObject = localStream;
+            setVideoState('local', 'playing');
         }
     } catch (err) {
         console.error("Media Error:", err);
@@ -44,6 +70,8 @@ function stopMedia() {
     }
     localVideo.srcObject = null;
     remoteVideo.srcObject = null;
+    setVideoState('local', 'stopped');
+    setVideoState('remote', 'stopped');
 }
 
 // --- BUTTON LISTENERS ---
@@ -51,10 +79,18 @@ startBtn.addEventListener('click', async () => {
     await startMedia();
     socket.emit('find-match');
     updateUI('searching');
+    setVideoState('remote', 'waiting'); // Show spinner immediately
 });
 
 nextBtn.addEventListener('click', () => {
+    // 1. Clear remote video immediately
     resetConnection();
+    remoteVideo.srcObject = null;
+    
+    // 2. Show spinner overlay
+    setVideoState('remote', 'waiting');
+    
+    // 3. Logic
     clearChat();
     socket.emit('find-match');
     updateUI('searching');
@@ -127,6 +163,7 @@ socket.on('waiting', (msg) => {
     statusBadge.innerText = "Searching...";
     statusBadge.style.background = "#f1c40f";
     statusBadge.style.color = "black";
+    setVideoState('remote', 'waiting'); // Ensure spinner is showing
     addSystemMessage(msg);
 });
 
@@ -172,6 +209,10 @@ socket.on('peer-disconnected', () => {
     remoteVideo.srcObject = null;
     statusBadge.innerText = "Stranger Left";
     statusBadge.style.background = "#e74c3c";
+    
+    // Show stopped state for remote
+    setVideoState('remote', 'stopped');
+    
     addSystemMessage("Stranger left. Click Next.");
 });
 
@@ -182,14 +223,16 @@ function createPeerConnection() {
         if (event.candidate) socket.emit('ice-candidate', event.candidate);
     };
     peerConnection.ontrack = (event) => {
+        // HIDE the overlay when video actually arrives
         remoteVideo.srcObject = event.streams[0];
+        setVideoState('remote', 'playing');
     };
 }
 
 // --- UI MANAGER ---
 function updateUI(state) {
     if (state === 'idle') {
-        startBtn.parentElement.classList.remove('hidden'); // Ensure parent is visible
+        startBtn.parentElement.classList.remove('hidden');
         startBtn.classList.remove('hidden');
         activeControls.classList.add('hidden');
         chatForm.classList.add('hidden');
@@ -206,4 +249,6 @@ function updateUI(state) {
 
 // Force UI reset on load
 updateUI('idle');
+setVideoState('local', 'stopped');
+setVideoState('remote', 'stopped');
 
