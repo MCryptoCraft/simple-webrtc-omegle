@@ -37,7 +37,7 @@ header {
     align-items: center;
 }
 .logo { font-weight: 700; font-size: 1.5rem; color: var(--logo); letter-spacing: 1px; }
-#status-badge { font-size: 0.8rem; padding: 4px 12px; background: #333; border-radius: 12px; }
+#status-badge { font-size: 0.8rem; padding: 4px 12px; background: #333; border-radius: 5px; }
 
 /* VIDEO SECTION */
 .video-section {
