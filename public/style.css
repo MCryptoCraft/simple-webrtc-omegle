@@ -16,9 +16,7 @@ body {
     background-color: var(--bg-dark);
     font-family: var(--font-family);
     color: var(--text-main);
-    /* Allow scrolling if screen is small */
     overflow-y: auto; 
-    /* Make space for the fixed bottom bar */
     padding-bottom: calc(var(--bottom-bar-height) + 20px);
 }
 
@@ -50,7 +48,7 @@ header {
 .video-card {
     position: relative;
     width: 100%;
-    aspect-ratio: 1 / 1; /* Keep it Square */
+    aspect-ratio: 1 / 1;
     background: #000;
     border-radius: 20px;
     overflow: hidden;
@@ -62,7 +60,57 @@ video {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transform: scaleX(-1); /* Mirror */
+    transform: scaleX(-1);
+}
+
+/* --- NEW: VIDEO OVERLAY (The Curtain) --- */
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #111; /* Black background to hide frozen video */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+    pointer-events: none; /* Let clicks pass through if needed */
+}
+
+/* Toggle class to show/hide overlay */
+.video-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.video-overlay span {
+    margin-top: 10px;
+    color: #888;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+.video-overlay .icon {
+    font-size: 2rem;
+    opacity: 0.5;
+}
+
+/* --- SPINNER ANIMATION --- */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255,255,255,0.1);
+    border-left-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 .label-badge {
@@ -74,6 +122,7 @@ video {
     border-radius: 8px;
     font-size: 0.8rem;
     backdrop-filter: blur(4px);
+    z-index: 20; /* Keep badge above overlay */
 }
 
 /* CHAT SECTION */
@@ -82,7 +131,7 @@ video {
     border-radius: 20px;
     display: flex;
     flex-direction: column;
-    height: 250px; /* Fixed height for chat area */
+    height: 250px;
     overflow: hidden;
     border: 1px solid rgba(255,255,255,0.05);
 }
@@ -101,7 +150,6 @@ video {
 .msg.remote { align-self: flex-start; background: #333; color: #ddd; border-bottom-left-radius: 2px; }
 .system-msg { text-align: center; color: #777; font-size: 0.8rem; margin: 10px 0; font-style: italic; }
 
-/* CHAT INPUT */
 #chat-form {
     display: flex;
     padding: 10px;
@@ -128,21 +176,21 @@ video {
     cursor: pointer;
 }
 
-/* --- FIXED BOTTOM BAR (The Fix) --- */
+/* FIXED BOTTOM CONTROLS */
 .controls-area {
     position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
     height: var(--bottom-bar-height);
-    background: rgba(15, 15, 19, 0.95); /* Nearly opaque background */
+    background: rgba(15, 15, 19, 0.95);
     backdrop-filter: blur(10px);
     border-top: 1px solid rgba(255,255,255,0.1);
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 0 20px;
-    z-index: 1000; /* Always on top */
+    z-index: 1000;
     box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
 }
 
@@ -171,7 +219,6 @@ button:active { transform: scale(0.95); }
 
 .hidden { display: none !important; }
 
-/* Desktop Tweak */
 @media (min-width: 800px) {
     .app-container {
         flex-direction: row;
